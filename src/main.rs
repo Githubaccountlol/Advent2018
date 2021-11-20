@@ -43,5 +43,5 @@ mod Day1;
 // mod Day25;
 
 fn main() {
-    Day1::DoPart1();
+    Day1::DoPart2();
 }
