@@ -36,7 +36,7 @@ pub fn DoPart2()
         {
             if Mismatches(a, b) == 1
             {
-                let result = a.chars().zip(b.chars()).filter(|(a,b)| a == b).map(|(a,b)| a).collect::<String>();
+                let result = a.chars().zip(b.chars()).filter(|(a,b)| a == b).map(|(a,_b)| a).collect::<String>();
                 println!("{}", result);
                 return;
             }
