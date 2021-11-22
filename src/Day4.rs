@@ -108,7 +108,12 @@ fn ConstructTimeTables(input: &Vec<(String, Event)>) -> HashMap<usize, Vec<Vec<b
             .for_each(|f| timeTable[f] = false);
         }
         
+    if let Some(id) = guard{
+        // init guard if needed
+        if map.get(&id).is_none() { map.insert(id, vec![]); }
         
+        let timeTables = map.get_mut(&id).unwrap();
+        timeTables.push(timeTable);
     }
 
     return map;
