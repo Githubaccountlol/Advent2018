@@ -45,15 +45,57 @@ pub fn DoPart1()
 
 pub fn DoPart2()
 {
+    let input = Input();
 
+    let map = ConstructTimeTables(&input);
+
+    map
+    .iter()
+    .for_each(|(a,b)| {b.iter().for_each(|b| {print!("{}\t", a); b.iter().for_each(|c| print!("{}", match c { true => '.', false => '#'})); println!();})});
+    println!();
+
+    // aggregate specific minutes asleep by guard
+    let sumTables = 
+    map
+    .keys()
+    .map(|k| 
+        (
+            *k, 
+            (0..60)
+            .map(|i| map.get(k).unwrap().iter().fold(0, |a,e| a + match e[i] {true => 0, false => 1,}))
+            .collect::<Vec<usize>>()
+        )
+    )
+    .collect::<HashMap<usize, Vec<usize>>>();
+
+    sumTables
+    .iter()
+    .for_each(|(a,b)| {print!("{}\t", a); b.iter().for_each(|c| print!("{}", c)); println!();});
+
+    // find each guard's maximum minute
+    let guardsBestMinute: HashMap<usize, (usize, usize)> = 
+    sumTables
+    .iter()
+    .map(|(id,minutes)| {let r = minutes.iter().enumerate().max_by(|(_a,b),(_c,d)| b.cmp(&d)).unwrap(); ((*id),(r.0,*r.1))})
+    .collect();
+
+    guardsBestMinute
+    .iter()
+    .for_each(|r| println!("Guard {} minute {} : {}", r.0, r.1.0, r.1.1));
+
+    let r = 
+    guardsBestMinute
+    .into_iter()
+    .max_by(|(_a,(b,c)),(_d,(e,f))| c.cmp(&f))
+    .unwrap();
+
+    println!("Guard {} minute {} : {} = {}", r.0, r.1.0, r.1.1, r.0 * r.1.0);
 }
 
 fn ConstructTimeTables(input: &Vec<(String, Event)>) -> HashMap<usize, Vec<Vec<bool>>>
 {
     // true = awake
     let mut map: HashMap<usize, Vec<Vec<bool>>> = Default::default();
-    
-
     
     let mut guard = None;
     let mut awake;
@@ -63,7 +105,6 @@ fn ConstructTimeTables(input: &Vec<(String, Event)>) -> HashMap<usize, Vec<Vec<b
     for i in (0..input.len())
     {
         let (time, entry) = &input[i];
-        println!("{:?}", entry);
 
         if let Guard(id) = entry 
         {
@@ -107,11 +148,12 @@ fn ConstructTimeTables(input: &Vec<(String, Event)>) -> HashMap<usize, Vec<Vec<b
             interval
             .for_each(|f| timeTable[f] = false);
         }
-        
+    }
+
     if let Some(id) = guard{
         // init guard if needed
         if map.get(&id).is_none() { map.insert(id, vec![]); }
-        
+
         let timeTables = map.get_mut(&id).unwrap();
         timeTables.push(timeTable);
     }
