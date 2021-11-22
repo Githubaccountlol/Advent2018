@@ -86,7 +86,7 @@ pub fn DoPart2()
     let r = 
     guardsBestMinute
     .into_iter()
-    .max_by(|(_a,(b,c)),(_d,(e,f))| c.cmp(&f))
+    .max_by(|(_a,(_b,c)),(_d,(_e,f))| c.cmp(&f))
     .unwrap();
 
     println!("Guard {} minute {} : {} = {}", r.0, r.1.0, r.1.1, r.0 * r.1.0);
