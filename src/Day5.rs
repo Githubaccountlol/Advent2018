@@ -1,3 +1,5 @@
+use std::{borrow::BorrowMut, collections::HashSet};
+
 use crate::FileInput::{self, GetInput};
 
 pub fn DoPart1()
@@ -11,7 +13,40 @@ pub fn DoPart1()
 
 pub fn DoPart2()
 {
-    
+    let mut input = Input();
+
+    ReactAll(&mut input);
+
+    let chars = 
+    input
+    .iter()
+    .map(|a| a.to_ascii_lowercase())
+    .collect::<HashSet<char>>();
+
+    let mut thing = 
+    chars
+    .iter()
+    .map(|a| (*a, input.iter().cloned().filter(|b| b.to_ascii_lowercase() != *a).collect::<Vec<char>>()))
+    .collect::<Vec<(char, Vec<char>)>>();
+
+    thing
+    .iter_mut()
+    .for_each(|(_a,b)| ReactAll(b));
+
+    // thing.iter().for_each(|(c,l)| println!("{} {}", c,l.into_iter().collect::<String>()));
+
+    let answer = 
+    thing
+    .iter()
+    .min_by(|(_a,b),(_c,d)| b.len().cmp(&d.len()))
+    .unwrap();
+
+    println!("{} {}", answer.0, answer.1.len());
+}
+
+fn ReactAll(string: &mut Vec<char>)
+{
+    while React(string){};
 }
 
 fn React(string: &mut Vec<char>) -> bool
