@@ -124,7 +124,13 @@ pub fn DoPart1()
 
 pub fn DoPart2()
 {
+    let points = Input();
+    let bounds = Boundary(&points);
 
+    let mut map: HashSet<Pos> = Default::default();
+    Fill2(&points, &mut map, &bounds);
+
+    println!("Region size: {}", map.len());
 }
 
 fn Square(pos: Pos, size: usize) -> impl Iterator<Item = Pos>
@@ -295,6 +301,22 @@ fn Fill(points: &HashSet<Pos>, map: &mut HashMap<Pos, (Option<Pos>, usize)>, (mi
             map.insert(p, (finalS.cloned(), finalD.unwrap()));
         }
     )
+}
+
+fn Fill2(points: &HashSet<Pos>, map: &mut HashSet<Pos>, (min,max): &(Pos,Pos))
+{
+    const distance: usize = 10000;
+
+    (min.0..=max.0)
+    .flat_map(move |x| (min.1..=max.1).map(move |y| Pos(x,y)))
+    .for_each(
+        |p|
+        {
+            let d = points.iter().fold(0, |a,e| a + Distance(&p, e));
+
+            if d < distance { map.insert(p); }
+        }
+    );
 }
 
 fn CountPoints(points: &HashSet<Pos>, map: &HashMap<Pos, (Option<Pos>, usize)>) -> HashMap<Pos, usize>
