@@ -10,6 +10,7 @@
 #![feature(iter_intersperse)]
 #![feature(linked_list_cursors)]
 #![feature(map_try_insert)]
+#![feature(int_abs_diff)]
 
 use FileInput::GetInput;
 
@@ -43,5 +44,5 @@ mod Day24;
 mod Day25;
 
 fn main() {
-    Day5::DoPart2();
+    Day6::DoPart1();
 }
