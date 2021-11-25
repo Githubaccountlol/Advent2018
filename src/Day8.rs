@@ -23,7 +23,10 @@ pub fn DoPart1()
 
 pub fn DoPart2()
 {
+    let nodes = Input();
 
+    let answer = nodes.Score();
+    println!("{}", answer);
 }
 
 fn Input() -> Node
@@ -61,5 +64,22 @@ impl Node
         nums.splice((0..metaCount), []);
 
         return Self{children, meta};
+    }
+
+    fn Score(&self) -> i64
+    {
+        if self.children.len() == 0{
+            return self.meta.iter().sum();
+        }
+        else{
+            self.meta.iter()
+            .fold(0, 
+                |a,e| 
+                {
+                    if e <= &0 { return a; }
+                    else { return a + self.children.get((e-&1) as usize).map_or(0, |f| f.Score()); }
+                }
+            )
+        }
     }
 }
