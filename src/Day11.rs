@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Range};
 
 use crate::FileInput::{self, GetInput};
 use Stuff::Point;
@@ -18,7 +18,7 @@ pub fn DoPart1()
     (1..=298)
     .flat_map(|a| (1..=298).map(move |b| (a,b)))
     .map(|(a,b)| Point::new(a,b))
-    .map(|p| (p, Square(p, &map)))
+    .map(|p| (p, Square(p, &map, 3)))
     .collect();
 
     let best = 
@@ -32,15 +32,79 @@ pub fn DoPart1()
 
 pub fn DoPart2()
 {
+    let s = Input();
 
+    let map: HashMap<Point<i64>, i64> = 
+    (1..=300)
+    .flat_map(|a| (1..=300).map(move |b| (a,b)))
+    .map(|(a,b)| Point::new(a,b))
+    .map(|p| (p, Step6(p,s)))
+    .collect();
+
+    let squares = 
+    SquaresAll(&map, (1..=300));
+
+    let best = 
+    squares
+    .iter()
+    .flat_map(|(i,a)| a.iter().map(move |(p,s)| (i,p,s)))
+    .max_by(|(_,_,a),(_,_,b)| a.cmp(b))
+    .unwrap();
+
+    println!("{} : {} : {}", best.0, best.1, best.2);
 }
 
-fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>) -> i64
+fn SquaresAll(map: &HashMap<Point<i64>, i64>, mut sizes: impl IntoIterator<Item = usize> + Iterator<Item = usize>) -> HashMap<usize, HashMap<Point<i64>, i64>>
+{
+    let mut new: HashMap<usize, HashMap<Point<i64>, i64>> = Default::default();
+    let x = sizes.next().unwrap();
+    new.insert(x, Squares(map, x));
+
+    for size in sizes
+    {
+        println!("{}", size);
+        
+        let thing: HashMap<Point<i64>, i64> = 
+        (1..=301-size)
+        .flat_map(|a| (1..=301-size).map(move |b| (a as i64,b as i64)))
+        .map(|(x,y)| Point::new(x,y))
+        .map(
+            |p|
+            (p, 
+            (0..size)
+            .flat_map(|i| [(i as i64, (size-1) as i64), ((size-1) as i64, i as i64)])
+            .map(move |(a,b)| Point::new(p.x+a,p.y+b))
+            .map(|p| map.get(&p).unwrap())
+            .sum::<i64>()
+            + new.get(&(size-1)).unwrap().get(&p).unwrap()
+            )
+        )
+        .collect();
+
+        new.insert(size, thing);
+    }
+
+    return new;
+}
+
+fn Squares(map: &HashMap<Point<i64>, i64>, size: usize) -> HashMap<Point<i64>, i64>
+{
+    let squares: HashMap<Point<i64>, i64> = 
+    (1..=301-size)
+    .flat_map(|a| (1..=301-size).map(move |b| (a as i64,b as i64)))
+    .map(|(a,b)| Point::new(a,b))
+    .map(|p| (p, Square(p, &map, size)))
+    .collect();
+
+    return squares;
+}
+
+fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
 {
     let vals: Vec<Option<i64>> = 
-    (0..3)
-    .flat_map(|a| (0..3).map(move |b| (a,b)))
-    .map(|(a,b)| Point::new(p.x + a, p.y + b))
+    (0..size)
+    .flat_map(|a| (0..size).map(move |b| (a,b)))
+    .map(|(a,b)| Point::new(p.x + a as i64, p.y + b as i64))
     .map(|p| map.get(&p).cloned())
     .collect();
 
