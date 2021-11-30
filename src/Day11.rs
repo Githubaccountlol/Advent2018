@@ -89,12 +89,27 @@ fn SquaresAll(map: &HashMap<Point<i64>, i64>, mut sizes: impl IntoIterator<Item 
 
 fn Squares(map: &HashMap<Point<i64>, i64>, size: usize) -> HashMap<Point<i64>, i64>
 {
-    let squares: HashMap<Point<i64>, i64> = 
-    (1..=301-size)
-    .flat_map(|a| (1..=301-size).map(move |b| (a as i64,b as i64)))
-    .map(|(a,b)| Point::new(a,b))
-    .map(|p| (p, Square(p, &map, size)))
-    .collect();
+    let mut squares: HashMap<Point<i64>, i64> = Default::default();
+
+    (1..=300-(size as i64)+1)
+    .map(|y| Point::new(1,y))
+    .for_each(
+        |pstart|
+        {
+            let s = Square(pstart, map, size);
+            squares.insert(pstart, s);
+            (2..=300-(size as i64)+1)
+            .map(|x| Point::new(x,pstart.y))
+            .fold(s, 
+                |a,e|
+                {
+                    let g = a + SquareShiftRight(e, map, size);
+                    squares.insert(e, g);
+                    g    
+                }
+            );
+        }
+    );
 
     return squares;
 }
@@ -111,6 +126,21 @@ fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
     if vals.iter().any(|b| b.is_none()) { panic!(); }
 
     return vals.iter().map(|a| a.unwrap()).sum();
+}
+
+fn SquareShiftRight(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
+{
+    // remove column we're leaving behind, add rightmost column of new square
+
+    (0..size as i64)
+    .map(|y| Point::new(p.x-1, p.y+y))
+    .map(|p| -map.get(&p).unwrap())
+    .sum::<i64>()
+    +
+    (0..size as i64)
+    .map(|y| Point::new(p.x + size as i64-1, p.y+y))
+    .map(|p| map.get(&p).unwrap())
+    .sum::<i64>()
 }
 
 fn Step1(p: Point<i64>) -> i64
