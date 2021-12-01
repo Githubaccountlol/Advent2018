@@ -42,7 +42,7 @@ pub fn DoPart2()
     .collect();
 
     let squares = 
-    SquaresAll(&map, (1..=300));
+    SquaresAll(&map, 300);
 
     let best = 
     squares
@@ -54,13 +54,13 @@ pub fn DoPart2()
     println!("{} : {} : {}", best.0, best.1, best.2);
 }
 
-fn SquaresAll(map: &HashMap<Point<i64>, i64>, mut sizes: impl IntoIterator<Item = usize> + Iterator<Item = usize>) -> HashMap<usize, HashMap<Point<i64>, i64>>
+fn SquaresAll(map: &HashMap<Point<i64>, i64>, size: i64) -> HashMap<i64, HashMap<Point<i64>, i64>>
 {
-    let mut new: HashMap<usize, HashMap<Point<i64>, i64>> = Default::default();
-    let x = sizes.next().unwrap();
-    new.insert(x, Squares(map, x));
+    let mut new: HashMap<i64, HashMap<Point<i64>, i64>> = Default::default();
+    
+    new.insert(1, map.clone());
 
-    for size in sizes
+    for size in (2..=size)
     {
         println!("{}", size);
         
@@ -68,19 +68,9 @@ fn SquaresAll(map: &HashMap<Point<i64>, i64>, mut sizes: impl IntoIterator<Item 
         (1..=301-size)
         .flat_map(|a| (1..=301-size).map(move |b| (a as i64,b as i64)))
         .map(|(x,y)| Point::new(x,y))
-        .map(
-            |p|
-            (p, 
-            (0..size)
-            .flat_map(|i| [(i as i64, (size-1) as i64), ((size-1) as i64, i as i64)])
-            .map(move |(a,b)| Point::new(p.x+a,p.y+b))
-            .map(|p| map.get(&p).unwrap())
-            .sum::<i64>()
-            + new.get(&(size-1)).unwrap().get(&p).unwrap()
-            )
-        )
+        .map(|p| (p, Expand(p, map, size, *new.get(&(size-1)).unwrap().get(&p).unwrap())))
         .collect();
-
+ 
         new.insert(size, thing);
     }
 
@@ -141,6 +131,21 @@ fn SquareShiftRight(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) 
     .map(|y| Point::new(p.x + size as i64-1, p.y+y))
     .map(|p| map.get(&p).unwrap())
     .sum::<i64>()
+}
+
+fn Expand(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: i64, parent: i64) -> i64
+{
+    (0..size as i64)
+    .map(|y| Point::new(p.x+size-1, p.y+y))
+    .map(|p| map.get(&p).unwrap())
+    .sum::<i64>()
+    +
+    (0..size as i64)
+    .map(|x| Point::new(p.x+x, p.y + size-1))
+    .map(|p| map.get(&p).unwrap())
+    .sum::<i64>()
+    +
+    parent
 }
 
 fn Step1(p: Point<i64>) -> i64
