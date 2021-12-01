@@ -77,7 +77,7 @@ fn SquaresAll(map: &HashMap<Point<i64>, i64>, size: i64) -> HashMap<i64, HashMap
     return new;
 }
 
-fn Squares(map: &HashMap<Point<i64>, i64>, size: usize) -> HashMap<Point<i64>, i64>
+fn Squares(map: &HashMap<Point<i64>, i64>, size: i64) -> HashMap<Point<i64>, i64>
 {
     let mut squares: HashMap<Point<i64>, i64> = Default::default();
 
@@ -104,7 +104,7 @@ fn Squares(map: &HashMap<Point<i64>, i64>, size: usize) -> HashMap<Point<i64>, i
     return squares;
 }
 
-fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
+fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: i64) -> i64
 {
     let vals: Vec<Option<i64>> = 
     (0..size)
@@ -118,7 +118,7 @@ fn Square(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
     return vals.iter().map(|a| a.unwrap()).sum();
 }
 
-fn SquareShiftRight(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) -> i64
+fn SquareShiftRight(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: i64) -> i64
 {
     // remove column we're leaving behind, add rightmost column of new square
 
@@ -135,12 +135,12 @@ fn SquareShiftRight(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: usize) 
 
 fn Expand(p: Point<i64>, map: &HashMap<Point<i64>, i64>, size: i64, parent: i64) -> i64
 {
-    (0..size as i64)
+    (0..size)
     .map(|y| Point::new(p.x+size-1, p.y+y))
     .map(|p| map.get(&p).unwrap())
     .sum::<i64>()
     +
-    (0..size as i64)
+    (0..size-1) // don't double-count bottom-right corner
     .map(|x| Point::new(p.x+x, p.y + size-1))
     .map(|p| map.get(&p).unwrap())
     .sum::<i64>()
